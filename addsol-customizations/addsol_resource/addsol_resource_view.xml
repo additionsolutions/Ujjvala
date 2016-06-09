@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+    
+        <record model="ir.ui.view" id="resource_skill_view_form">
+            <field name="name">resource.skill.view.form</field>
+            <field name="model">resource.skill</field>
+            <field name="arch" type="xml">
+                <form string="Skills">
+                    <group col="4">
+                        <field name="name"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        
+        <record model="ir.ui.view" id="resource_skill_view_tree">
+            <field name="name">resource.skill.view.tree</field>
+            <field name="model">resource.skill</field>
+            <field name="arch" type="xml">
+                <tree string="Skills">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="open_view_resource_skill" model="ir.actions.act_window">
+            <field name="name">Skills</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">resource.skill</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <record model="ir.ui.view" id="resource_level_view_form">
+            <field name="name">resource.level.view.form</field>
+            <field name="model">resource.level</field>
+            <field name="arch" type="xml">
+                <form string="Levels">
+                    <group col="4">
+                        <field name="name"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        
+        <record model="ir.ui.view" id="resource_level_view_tree">
+            <field name="name">resource.level.view.tree</field>
+            <field name="model">resource.level</field>
+            <field name="arch" type="xml">
+                <tree string="Levels">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="open_view_resource_level" model="ir.actions.act_window">
+            <field name="name">Levels</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">resource.level</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <record id="addsol_resource_view" model="ir.ui.view">
+            <field name="name">addsol.resource.view.form</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <notebook position="inside">
+                    <page string="Billability &amp; Skills" groups="project.group_project_manager,base.group_hr_manager">
+                        <group string="Skills Set">
+                            <field name="skill_set" nolabel="1">
+                                <tree string="Skill Set" editable="bottom">
+                                    <field name="skill"/>
+                                    <field name="level"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <group string="Billability">
+                            <label for="billable_start_date" string="Billable Date"/>
+                            <div>
+                                <field name="billable_start_date" class="oe_inline"/> - <field name="billable_end_date" class="oe_inline" />
+                            </div>
+                            <field name="on_bench"/>
+                            <field name="project"/>
+                        </group>
+                        <group string="Resume">
+                            <field name="resume"/>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+
+        <record id="addsol_view_employee_filter" model="ir.ui.view">
+            <field name="name">Employees</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="skill_set" string="Skill" filter_domain="[('skill_set.skill','ilike',self)]"/>
+                    <field name="skill_set" string="Level" filter_domain="[('skill_set.level','ilike',self)]"/>
+                </xpath>
+                <xpath expr="//group/filter[@string='Job']" position="after">
+                    <filter string="On Bench" context="{'group_by':'on_bench'}"/>
+                </xpath>
+            </field>
+        </record>
+        
+        <record model="ir.ui.view" id="resource_request_tree">
+            <field name="name">resource.request.tree</field>
+            <field name="model">resource.request</field>
+            <field name="arch" type="xml">
+                <tree string="Resource Requests">
+                    <field name="name"/>
+                    <field name="project_id"/>
+                    <field name="manager_id"/>
+                    <field name="parent_id" invisible="1"/>
+                    <field name="type"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        
+        <record id="resource_request_filter" model="ir.ui.view">
+            <field name="name">resource.request.filter</field>
+            <field name="model">resource.request</field>
+            <field name="arch" type="xml">
+                <search string="Search Requests">
+                    <field name="name"/>
+                    <separator/>                   
+                    <filter domain="[('state','in',['submit','assign'])]" string="To Approve" name="submit"/>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="resource_request_form">
+            <field name="name">resource.request.form</field>
+            <field name="model">resource.request</field>
+            <field name="arch" type="xml">
+                <form string="Resource Requests">
+                    <header>
+                        <button name="submit_request" string="Submit" type="object" states="new" class="oe_highlight"/>
+                        <button name="%(action_assign_resources_wizard)d" type="action" string="Assign Resources" attrs="{'invisible':['|',('type','!=','new'), ('state','!=','submit')]}" class="oe_highlight"/>
+                        <button name="assign_approve" string="Approve" states="assign" class="oe_highlight" groups="base.group_hr_user"/>
+                        <button name="submit_approve" string="Approve" states="submit" class="oe_highlight" groups="base.group_hr_user"/>
+                        <button name="assign_reject" string="Reject" states="assign" groups="base.group_hr_user"/>
+                        <!--button name="close_request" string="Close" type="object" states="approve" groups="base.group_hr_user"/-->
+                        <field name="state" widget="statusbar" statusbar_visible="new,approve" statusbar_colors='{"reject":"red"}' readonly="1"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="name" class="oe_edit_only" string="Request Number"/>
+                            <h1>
+                                <field name="name" string="Request Number"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="project_id" domain="[('user_id','=',uid)]"/>
+                                <field name="type"/>
+                            </group>
+                            <group>
+                                <field name="manager_id"/>
+                                <field name="parent_id" attrs="{'invisible': [('type','!=','extension')]}"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="request_line_ids" nolabel="1">
+                                <tree string="Request Lines">
+                                    <field name="req_type" invisible="1"/>
+                                    <field name="sequence"/>
+                                    <field name="resource_id"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="skill_id"/>
+                                    <field name="level_id"/>
+                                    <field name="no_of_resources"/>
+                                    <field name="billability_start_date"/>
+                                    <field name="billability_end_date"/>
+                                    <field name="progress" widget="progressbar"/>
+                                </tree>
+                                <form string="Request Lines">
+                                    <group>
+                                        <group>
+                                            <field name="sequence"/>
+                                            <field name="request_id" invisible="1"/>
+                                            <field name="req_type" invisible="1"/>
+                                        </group>
+                                        <group>
+                                            <field name="start_date" attrs="{'invisible': [('req_type','=','terminate')], 'required': [('req_type','in',['new','extension'])]}"/>
+                                            <field name="end_date"/>
+                                        </group>
+                                    </group>
+                                    <group attrs="{'invisible': [('req_type','!=','new')]}">
+                                        <group>
+                                            <field name="skill_id" attrs="{'required': [('req_type','=','new')]}"/>
+                                            <field name="level_id" attrs="{'required': [('req_type','=','new')]}"/>
+                                            <field name="no_of_resources" attrs="{'required': [('req_type','=','new')]}"/>
+                                        </group>
+                                        <group>
+                                            <field name="billability_start_date" attrs="{'required': [('req_type','=','new')]}"/>
+                                            <field name="billability_end_date" attrs="{'required': [('req_type','=','new')]}"/>
+                                        </group>
+                                    </group>
+                                    <group>
+                                        <field name="resource_id" attrs="{'invisible': [('req_type','=','new')], 'required': [('req_type','in',['extension','terminate'])]}"/>
+                                        <field name="reason" attrs="{'invisible': [('req_type','!=','terminate')], 'required': [('req_type','=','terminate')]}"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </group>
+                        <group string="Assigned Resources">
+                            <field name="resource_ids" nolabel="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="open_resource_request_form" model="ir.actions.act_window">
+            <field name="name">Resource Requests</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">resource.request</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_state': 'new'}</field>
+        </record>
+
+        <record id="open_resource_request_form_approve" model="ir.actions.act_window">
+            <field name="name">Resource Requests to Approve</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">resource.request</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="resource_request_filter"/>
+            <field name="context">{'search_default_submit': 1}</field>
+        </record>
+        
+        <!-- Menus -->
+
+        <menuitem id="menu_resource_request_form" parent="hr.menu_hr_root" name="Resource Management" sequence="43"
+                  groups="project.group_project_manager,base.group_hr_manager"/>
+        <menuitem id="menu_open_resource_request_form" action="open_resource_request_form" parent="menu_resource_request_form" name="Resource Requests"
+                    groups="project.group_project_manager"/>
+        <menuitem id="menu_open_resource_request_form_approve" action="open_resource_request_form_approve" parent="menu_resource_request_form" 
+                    name="Resource Requests to Approve" groups="base.group_hr_manager"/>
+        
+        <menuitem sequence="11" id="menu_open_view_reource_management_config" parent="hr.menu_hr_configuration" name="Resource Management"/>
+        <menuitem name="Skills" action="open_view_resource_skill" id="menu_open_view_resource_skill" parent="menu_open_view_reource_management_config" sequence="12"/>
+        <menuitem name="Levels" action="open_view_resource_level" id="menu_open_view_resource_level" parent="menu_open_view_reource_management_config" sequence="13"/>
+        
+    </data>
+</openerp>
